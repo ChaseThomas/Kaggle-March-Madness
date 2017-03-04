@@ -7,6 +7,8 @@ from sklearn.model_selection import train_test_split
 SEED = 1337
 FILEPATH = "data/processed.csv"
 LEARNING_RATE = 0.05
+NUM_EPOCHS = 1000
+BATCH_SIZE = 100
 
 
 def shooting(fgm, fga, fgm3):
@@ -49,18 +51,21 @@ def freethrows(ftm, fta):
 
 def process_row(x):
     result = {
-        'Wshooting': shooting(x['Wfgm'], x['Wfga'], x['Wfgm3']),
-        'Lshooting': shooting(x['Lfgm'], x['Lfga'], x['Lfgm3']),
-        'Wturnovers': turnovers(x['Wto'], x['Wfga'], x['Wfta']),
-        'Lturnovers': turnovers(x['Lto'], x['Lfga'], x['Lfta']),
-        'Woff_rebounds': off_rebounds(x['Wor'], x['Ldr']),
-        'Loff_rebounds': off_rebounds(x['Lor'], x['Wdr']),
-        'Wdef_rebounds': def_rebounds(x['Wdr'], x['Lor']),
-        'Ldef_rebounds': def_rebounds(x['Ldr'], x['Wor']),
-        'Wfreethrows': freethrows(x['Wftm'], x['Wfta']),
-        'Lfreethrows': freethrows(x['Lftm'], x['Lfta']),
+        'shooting': shooting(x['Wfgm']-x['Lfgm'], x['Wfga']-x['Lfga'], x['Wfgm3']-x['Lfgm3']),
+        #'Lshooting': shooting(x['Lfgm'], x['Lfga'], x['Lfgm3']),
+        'Wturnovers': turnovers(x['Wto']-x['Lto'], x['Wfga']-x['Lfga'], x['Wfta']-x['Lfta']),
+        #'Lturnovers': turnovers(x['Lto'], x['Lfga'], x['Lfta']),
+        'Woff_rebounds': off_rebounds(x['Wor']-x['Lor'], x['Ldr']-x['Wdr']),
+        #'Loff_rebounds': off_rebounds(x['Lor'], x['Wdr']),
+        'Wdef_rebounds': def_rebounds(x['Wdr']-x['Ldr'], x['Lor']-x['Wor']),
+        #'Ldef_rebounds': def_rebounds(x['Ldr'], x['Wor']),
+        'Wfreethrows': freethrows(x['Wftm']-x['Lftm'], x['Wfta']-x['Lfta']),
+        #'Lfreethrows': freethrows(x['Lftm'], x['Lfta']),
     }
     return pd.Series(result)
+
+def randomize_row(x):
+    pass
 
 
 def main():
@@ -75,8 +80,17 @@ def main():
         processed_df = df_full.apply(process_row, axis=1)
         processed_df.to_csv(FILEPATH)
         print("Finished calculating data for preprocessing!")
+    x_matrix = processed_df.values
+    #print(x_matrix)
+    np.apply_along_axis(randomize_row, axis=1, arr=x_matrix)
+    #TODO: Fix this shit
+
+
 
     #SETUP THE MODEL
+    #Input
+    x_data = tf.constant(processed_df.as_matrix(), dtype=tf.float32, name="Input", shape=processed_df.shape)
+
 
     #Symbolic Vars
     X = tf.placeholder(tf.float32, (None, 5), name="Features")
@@ -98,8 +112,15 @@ def main():
     train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(loss)
     prediction_step = tf.argmax(y, 1)
 
-    #Optimization Loop
-    #TODO
+    #Training Loop
+    with tf.Session() as sess:
+        sess.run(tf.global_variables_initializer())
+        for epoch in range(NUM_EPOCHS):
+            epoch_loss = 0
+            for _ in range(int(processed_df.shape[0]/BATCH_SIZE)):
+                pass
+                #x_batch, y_batch = x_data.n
+                #TODO: Finish the training loop
 
 if __name__ == "__main__": main()
 
