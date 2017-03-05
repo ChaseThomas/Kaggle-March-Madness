@@ -85,19 +85,28 @@ def main():
             dtype=np.float32,
             skipinitialspace=True)
         processed_df = df_full.apply(process_row, axis=1)
-        print(processed_df)
         processed_df.to_csv(FILEPATH)
         print("Finished calculating data for preprocessing!")
-    x_matrix = processed_df.values[:, 1:] # Strip index column and return as numpy matrix
-    # TODO: Fix this shit
+
+    # Setup x_matrix
+    x_matrix = processed_df.values[:, 1:]  # Strip index column and return as numpy matrix
+    x_matrix = np.repeat(x_matrix, 2, axis=0)  # Duplicate each row
+    x_matrix[1::2, :] *= -1  # Invert every other row to represent losers
+
+    # Setup y_matrix
+    y_matrix = np.empty(x_matrix.shape[0], dtype=np.float32)
+
+    y_matrix[::2] = 1  # Winners
+    y_matrix[1::2] = 0  # Losers
 
     # SETUP THE MODEL
     # Input
     x_data = tf.constant(processed_df.as_matrix(), dtype=tf.float32, name="Input", shape=processed_df.shape)
+    y_data = tf.constant(y_matrix, dtype=tf.float32, name="Output")
 
     # Symbolic Vars
     X = tf.placeholder(tf.float32, (None, 5), name="Features")
-    Y = tf.placeholder(tf.bool, (None, 1), name="Target")
+    Y = tf.placeholder(tf.bool, (None, 1), name="Targets")
 
     # Parameters
     w = tf.Variable(tf.random_normal((5, 1), stddev=0.01, name="Parameters"))
