@@ -7,8 +7,8 @@ from sklearn.model_selection import train_test_split
 SEED = 1337
 FILEPATH = "data/processed.csv"
 LEARNING_RATE = 0.05
-NUM_EPOCHS = 1000
-BATCH_SIZE = 100
+NUM_EPOCHS = 10000
+BATCH_SIZE = 256
 
 
 def shooting(fgm, fga, fgm3):
@@ -91,48 +91,64 @@ def main():
     # Setup x_matrix
     x_matrix = processed_df.values[:, 1:]  # Strip index column and return as numpy matrix
     x_matrix = np.repeat(x_matrix, 2, axis=0)  # Duplicate each row
-    x_matrix[1::2, :] *= -1  # Invert every other row to represent losers
+    x_matrix[1::2, :] *= -1.0  # Invert every other row to represent losers
 
     # Setup y_matrix
-    y_matrix = np.empty(x_matrix.shape[0], dtype=np.float32)
+    y_matrix = np.empty((x_matrix.shape[0], 1), dtype=np.float32)
 
-    y_matrix[::2] = 1  # Winners
-    y_matrix[1::2] = 0  # Losers
+    y_matrix[::2] = 1.0  # Winners
+    y_matrix[1::2] = 0.0  # Losers
+
+    x_train, x_test, y_train, y_test = train_test_split(
+        x_matrix, y_matrix, test_size=0.2, random_state=SEED
+    )
+    # print(x_train, "\n\n", y_train)
+
 
     # SETUP THE MODEL
-    # Input
-    x_data = tf.constant(processed_df.as_matrix(), dtype=tf.float32, name="Input", shape=processed_df.shape)
-    y_data = tf.constant(y_matrix, dtype=tf.float32, name="Output")
-
     # Symbolic Vars
     X = tf.placeholder(tf.float32, (None, 5), name="Features")
-    Y = tf.placeholder(tf.bool, (None, 1), name="Targets")
+    Y = tf.placeholder(tf.float32, (None, 1), name="Targets")
 
     # Parameters
-    w = tf.Variable(tf.random_normal((5, 1), stddev=0.01, name="Parameters"))
-    b = tf.Variable(tf.random_normal((1,), stddev=0.01, name="Bias"))
+    w = tf.Variable(tf.random_normal((5, 1), stddev=0.1, dtype=tf.float32, name="Parameters"))
+    b = tf.Variable(tf.random_normal((1,), stddev=0.1, dtype=tf.float32, name="Bias"))
 
     # Output Function
     y = tf.matmul(X, w) + b
 
     # Loss Function
-    loss = tf.reduce_mean(
+    '''loss = tf.reduce_mean(
         tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=y),
         name='Loss'
+    '''
+    loss = tf.reduce_mean(
+        tf.nn.sigmoid_cross_entropy_with_logits(labels=Y, logits=y)
     )
+
     # Gradient Descent and Output Calculation
     train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(loss)
-    prediction_step = tf.argmax(y, 1)
+    sess = tf.InteractiveSession()
+    sess.run(tf.global_variables_initializer())
+    # sess.run(tf.local_variables_initializer())
+    # sess.run(tf.global_variables_initializer())
 
-    # Training Loop
-    with tf.Session() as sess:
-        sess.run(tf.global_variables_initializer())
-        for epoch in range(NUM_EPOCHS):
-            epoch_loss = 0
-            for _ in range(int(processed_df.shape[0] / BATCH_SIZE)):
-                pass
-                # x_batch, y_batch = x_data.n
-                # TODO: Finish the training loop
+    # Training
+    num_batch = x_matrix.shape[0] / BATCH_SIZE
+    for epoch in range(NUM_EPOCHS):
+        epoch_loss = 0
+
+        _, loss_val = sess.run([train_step, loss], feed_dict={X: x_train, Y: y_train})
+        # print(loss_val, "\n", params, "\n")
+        if epoch % 100 == 0:
+            print(loss_val)
+
+    # Testing
+    correct_prediction = tf.equal(tf.round(y), tf.round(Y))
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    predictions, accuracy = sess.run([correct_prediction, accuracy], feed_dict={X: x_test, Y: y_test})
+    print(predictions)
+    print(accuracy)
 
 
 if __name__ == "__main__":
