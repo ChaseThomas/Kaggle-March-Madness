@@ -6,9 +6,12 @@ from sklearn.model_selection import train_test_split
 
 SEED = 1337
 FILEPATH = "data/processed.csv"
-LEARNING_RATE = 0.05
-NUM_EPOCHS = 10000
+MODELPATH = "saved-networks/model.ckpt"
+LEARNING_RATE = 1E-6
+NUM_EPOCHS = 1000000
 BATCH_SIZE = 256
+SHOULD_RESTORE = False
+SHOULD_SAVE = True
 
 
 def shooting(fgm, fga, fgm3):
@@ -100,10 +103,8 @@ def main():
     y_matrix[1::2] = 0.0  # Losers
 
     x_train, x_test, y_train, y_test = train_test_split(
-        x_matrix, y_matrix, test_size=0.2, random_state=SEED
+        x_matrix, y_matrix, test_size=0.2
     )
-    # print(x_train, "\n\n", y_train)
-
 
     # SETUP THE MODEL
     # Symbolic Vars
@@ -118,37 +119,42 @@ def main():
     y = tf.matmul(X, w) + b
 
     # Loss Function
-    '''loss = tf.reduce_mean(
+    '''loss = tf.reduce_sum(
         tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=y),
         name='Loss'
-    '''
-    loss = tf.reduce_mean(
+    )'''
+    '''loss = tf.reduce_mean(
         tf.nn.sigmoid_cross_entropy_with_logits(labels=Y, logits=y)
-    )
+    )'''
+    loss = tf.nn.l2_loss(y-Y)
 
     # Gradient Descent and Output Calculation
     train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(loss)
+
+    saver = tf.train.Saver()
     sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    # sess.run(tf.local_variables_initializer())
-    # sess.run(tf.global_variables_initializer())
+    if SHOULD_RESTORE:
+        print("Restoring Model...")
+        saver.restore(sess, MODELPATH)
+        print("Model Restored!")
+    else:
+        sess.run(tf.global_variables_initializer())
 
-    # Training
-    num_batch = x_matrix.shape[0] / BATCH_SIZE
     for epoch in range(NUM_EPOCHS):
-        epoch_loss = 0
-
         _, loss_val = sess.run([train_step, loss], feed_dict={X: x_train, Y: y_train})
         # print(loss_val, "\n", params, "\n")
         if epoch % 100 == 0:
-            print(loss_val)
+            print(loss_val/x_train.shape[0])
 
     # Testing
-    correct_prediction = tf.equal(tf.round(y), tf.round(Y))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    correct_prediction = tf.equal(tf.round(y), tf.round(Y))  # Vector of bool
+    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))  #scalar
     predictions, accuracy = sess.run([correct_prediction, accuracy], feed_dict={X: x_test, Y: y_test})
-    print(predictions)
-    print(accuracy)
+    print("Testing accuracy was: %f" % accuracy)
+    if SHOULD_SAVE:
+        print("Saving Model...")
+        save_path = saver.save(sess, "saved-networks/model.ckpt")
+        print("Model successfully saved in file: %s" % save_path)
 
 
 if __name__ == "__main__":
