@@ -15,7 +15,7 @@ def shooting(fgm, fga, fgm3):
     if fga == 0:
         return 0
     else:
-        (fgm+0.5*fgm3) / fga
+        return (fgm + 0.5 * fgm3) / fga
 
 
 def turnovers(to, fga, fta):
@@ -50,77 +50,81 @@ def freethrows(ftm, fta):
 
 
 def process_row(x):
+    w_shooting = shooting(x['Wfgm'], x['Wfga'], x['Wfgm3'])
+    l_shooting = shooting(x['Lfgm'], x['Lfga'], x['Lfgm3'])
+    w_turnovers = turnovers(x['Wto'], x['Wfga'], x['Wfta'])
+    l_turnovers = turnovers(x['Lto'], x['Lfga'], x['Lfta'])
+    w_off_rebounds = off_rebounds(x['Wor'], x['Ldr'])
+    l_off_rebounds = off_rebounds(x['Lor'], x['Wdr'])
+    w_def_rebounds = def_rebounds(x['Wdr'], x['Lor'])
+    l_def_rebounds = def_rebounds(x['Ldr'], x['Wor'])
+    w_freethrows = freethrows(x['Wftm'], x['Wfta'])
+    l_freethrows = freethrows(x['Lftm'], x['Lfta'])
     result = {
-        'shooting': shooting(x['Wfgm']-x['Lfgm'], x['Wfga']-x['Lfga'], x['Wfgm3']-x['Lfgm3']),
-        #'Lshooting': shooting(x['Lfgm'], x['Lfga'], x['Lfgm3']),
-        'Wturnovers': turnovers(x['Wto']-x['Lto'], x['Wfga']-x['Lfga'], x['Wfta']-x['Lfta']),
-        #'Lturnovers': turnovers(x['Lto'], x['Lfga'], x['Lfta']),
-        'Woff_rebounds': off_rebounds(x['Wor']-x['Lor'], x['Ldr']-x['Wdr']),
-        #'Loff_rebounds': off_rebounds(x['Lor'], x['Wdr']),
-        'Wdef_rebounds': def_rebounds(x['Wdr']-x['Ldr'], x['Lor']-x['Wor']),
-        #'Ldef_rebounds': def_rebounds(x['Ldr'], x['Wor']),
-        'Wfreethrows': freethrows(x['Wftm']-x['Lftm'], x['Wfta']-x['Lfta']),
-        #'Lfreethrows': freethrows(x['Lftm'], x['Lfta']),
+        'def_rebounds': w_def_rebounds - l_def_rebounds,
+        'freethrows': w_freethrows - l_freethrows,
+        'off_rebounds': w_off_rebounds - l_off_rebounds,
+        'shooting': w_shooting - l_shooting,
+        'turnovers': w_turnovers - l_turnovers,
     }
     return pd.Series(result)
-
-def randomize_row(x):
-    pass
 
 
 def main():
     processed_file = Path(FILEPATH)
     if processed_file.is_file():
         print("Loading preprocessed data!")
-        processed_df = pd.read_csv(processed_file, skipinitialspace=True)
+        processed_df = pd.read_csv(processed_file, dtype=np.float32, skipinitialspace=True)
         print("Finished loading data!")
     else:
         print("Calculating data for preprocessing!")
-        df_full = pd.read_csv("data/RegularSeasonDetailedResults.csv", skipinitialspace=True)
+        df_full = pd.read_csv(
+            "data/RegularSeasonDetailedResults.csv",
+            usecols=('Wfgm',  'Lfgm',  'Wfga',  'Lfga',  'Wfgm3', 'Lfgm3', 'Wto',   'Lto',
+                     'Wfta',  'Lfta',  'Wor',   'Lor',   'Wdr',   'Ldr',   'Wftm',  'Lftm'),
+            dtype=np.float32,
+            skipinitialspace=True)
         processed_df = df_full.apply(process_row, axis=1)
+        print(processed_df)
         processed_df.to_csv(FILEPATH)
         print("Finished calculating data for preprocessing!")
-    x_matrix = processed_df.values
-    #print(x_matrix)
-    np.apply_along_axis(randomize_row, axis=1, arr=x_matrix)
-    #TODO: Fix this shit
+    x_matrix = processed_df.values[:, 1:] # Strip index column and return as numpy matrix
+    # TODO: Fix this shit
 
-
-
-    #SETUP THE MODEL
-    #Input
+    # SETUP THE MODEL
+    # Input
     x_data = tf.constant(processed_df.as_matrix(), dtype=tf.float32, name="Input", shape=processed_df.shape)
 
-
-    #Symbolic Vars
+    # Symbolic Vars
     X = tf.placeholder(tf.float32, (None, 5), name="Features")
     Y = tf.placeholder(tf.bool, (None, 1), name="Target")
 
-    #Parameters
-    w = tf.Variable(tf.random_normal((5, 1), stddev=0.1, name="Parameters"))
-    b = tf.Variable(tf.random_normal((1,), stddev=0.1, name="Bias"))
+    # Parameters
+    w = tf.Variable(tf.random_normal((5, 1), stddev=0.01, name="Parameters"))
+    b = tf.Variable(tf.random_normal((1,), stddev=0.01, name="Bias"))
 
-    #Output Function
+    # Output Function
     y = tf.matmul(X, w) + b
 
-    #Loss Function
+    # Loss Function
     loss = tf.reduce_mean(
-        tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=y)
+        tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=y),
+        name='Loss'
     )
-
-    #Gradient Descent and Output Calculation
+    # Gradient Descent and Output Calculation
     train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(loss)
     prediction_step = tf.argmax(y, 1)
 
-    #Training Loop
+    # Training Loop
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         for epoch in range(NUM_EPOCHS):
             epoch_loss = 0
-            for _ in range(int(processed_df.shape[0]/BATCH_SIZE)):
+            for _ in range(int(processed_df.shape[0] / BATCH_SIZE)):
                 pass
-                #x_batch, y_batch = x_data.n
-                #TODO: Finish the training loop
+                # x_batch, y_batch = x_data.n
+                # TODO: Finish the training loop
 
-if __name__ == "__main__": main()
 
+if __name__ == "__main__":
+    main()
