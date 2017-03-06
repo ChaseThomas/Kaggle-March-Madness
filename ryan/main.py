@@ -7,11 +7,10 @@ from sklearn.model_selection import train_test_split
 SEED = 1337
 FILEPATH = "data/processed.csv"
 MODELPATH = "saved-networks/model.ckpt"
-LEARNING_RATE = 1E-6
 NUM_EPOCHS = 1000000
-BATCH_SIZE = 256
 SHOULD_RESTORE = False
 SHOULD_SAVE = True
+BETA = 0.01  # Regularizer strength
 
 
 def shooting(fgm, fga, fgm3):
@@ -102,8 +101,9 @@ def main():
     y_matrix[::2] = 1.0  # Winners
     y_matrix[1::2] = 0.0  # Losers
 
+    # Split data into testing and training sets
     x_train, x_test, y_train, y_test = train_test_split(
-        x_matrix, y_matrix, test_size=0.2
+        x_matrix, y_matrix, test_size=0.2, random_state=SEED
     )
 
     # SETUP THE MODEL
@@ -112,25 +112,32 @@ def main():
     Y = tf.placeholder(tf.float32, (None, 1), name="Targets")
 
     # Parameters
-    w = tf.Variable(tf.random_normal((5, 1), stddev=0.1, dtype=tf.float32, name="Parameters"))
-    b = tf.Variable(tf.random_normal((1,), stddev=0.1, dtype=tf.float32, name="Bias"))
+    w = tf.Variable(tf.random_normal((5, 1), stddev=0.1, dtype=tf.float32, seed=SEED, name="Parameters"))
+    b = tf.Variable(tf.random_normal((1,), stddev=0.1, dtype=tf.float32, seed=SEED, name="Bias"))
 
-    # Output Function
+    # Output Function (before sigmoid, passed to the loss function)
     y = tf.matmul(X, w) + b
 
-    # Loss Function
-    '''loss = tf.reduce_sum(
-        tf.nn.softmax_cross_entropy_with_logits(labels=Y, logits=y),
-        name='Loss'
-    )'''
-    '''loss = tf.reduce_mean(
-        tf.nn.sigmoid_cross_entropy_with_logits(labels=Y, logits=y)
-    )'''
-    loss = tf.nn.l2_loss(y-Y)
+    # Output Function (after sigmoid, represents the actual predicted probabilities)
+    y_hat = tf.sigmoid(y, name="Y-hat")
 
-    # Gradient Descent and Output Calculation
-    train_step = tf.train.GradientDescentOptimizer(LEARNING_RATE).minimize(loss)
+    # Cost and Loss functions
+    regularizer = tf.nn.l2_loss(w)  # Penalize parameters on their L2 norm squared
 
+    loss = tf.reduce_sum(
+        tf.nn.sigmoid_cross_entropy_with_logits(labels=Y, logits=y)  # use cross entropy as loss
+    )
+
+    cost = loss + BETA * regularizer  # The final cost function to minimize
+
+    # Optimizer setup
+    train_step = tf.train.AdamOptimizer().minimize(cost)
+
+    # Summary data
+    match_results = tf.equal(tf.round(y_hat), tf.round(Y))  # Vector of bool, where True means prediction correct
+    accuracy = tf.reduce_mean(tf.cast(match_results, tf.float32))  # scalar of percentage of correct predictions
+
+    # Setup TensorFlow Session and initialize graph variables
     saver = tf.train.Saver()
     sess = tf.InteractiveSession()
     if SHOULD_RESTORE:
@@ -140,17 +147,21 @@ def main():
     else:
         sess.run(tf.global_variables_initializer())
 
+    # Training loop for parameter tuning
     for epoch in range(NUM_EPOCHS):
-        _, loss_val = sess.run([train_step, loss], feed_dict={X: x_train, Y: y_train})
-        # print(loss_val, "\n", params, "\n")
+        _, cost_val = sess.run([train_step, cost], feed_dict={X: x_train, Y: y_train})
         if epoch % 100 == 0:
-            print(loss_val/x_train.shape[0])
+            print("Current Cost Value: %f" % cost_val)
 
-    # Testing
-    correct_prediction = tf.equal(tf.round(y), tf.round(Y))  # Vector of bool
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))  #scalar
-    predictions, accuracy = sess.run([correct_prediction, accuracy], feed_dict={X: x_test, Y: y_test})
-    print("Testing accuracy was: %f" % accuracy)
+    # Training Summary
+    training_accuracy = sess.run(accuracy, feed_dict={X: x_train, Y: y_train})
+    print("Training Accuracy: %f" % training_accuracy)
+
+    # Testing Summary
+    testing_accuracy = sess.run(accuracy, feed_dict={X: x_test, Y: y_test})
+    print("Testing accuracy was: %f" % testing_accuracy)
+
+    # Save session if needed
     if SHOULD_SAVE:
         print("Saving Model...")
         save_path = saver.save(sess, "saved-networks/model.ckpt")
