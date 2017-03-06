@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import logistic
+from logistic import LogReg
 import tree
 
 data_dir = '~/Desktop/MM2017/'
@@ -19,7 +19,8 @@ def teamProcessing(data):
     
     return grouped
 
-
+def pickRandomTrainingSet(df_results):
+    return 0
 
 def main():
     reg_details_orig = pd.read_csv(data_dir + 'RegularSeasonDetailedResults.csv')
@@ -29,10 +30,12 @@ def main():
     
     df_results = reg_details_orig[reg_details_orig['Season'] > 2010]
     
-    logModel = logistic.derive_model(df_results)
-    treeModel = tree.derive_model(df_results)
+    logModel = LogReg()
+    logModel.setup_model(df_results, team_aggregate)
+    print logModel.get_prediction([1101, 1181], [1181, 1102])
+    print logModel.get_prediction_int([1101, 1181], [1181, 1102])
     
     
-    
+    #treeModel = tree.derive_model(df_results)
 
 main()
