@@ -69,7 +69,7 @@ def process_row(x):
         'Lshooting': l_shooting,
         'Lturnovers': l_turnovers,
     }
-    return pd.Series(result)
+    return pd.Series(result, dtype=np.float32)
 
 
 def load_tourney_results():
@@ -88,7 +88,8 @@ def preprocess_team_avg():
     processed_file = Path(AVG_FILEPATH)
     if processed_file.is_file():
         print("Loading team averages!")
-        team_avgs_df = pd.read_csv(processed_file, index_col=0, dtype=np.float32, skipinitialspace=True)
+        team_avgs_df = pd.read_csv(processed_file, index_col=[0, 1], dtype=np.float32, skipinitialspace=True)
+        print(team_avgs_df)
         print("Finished loading team averages!")
     else:
         print("Calculating team averages!")
@@ -98,19 +99,19 @@ def preprocess_team_avg():
                      'Wfta',  'Lfta',  'Wor',   'Lor',   'Wdr',   'Ldr',   'Wftm',  'Lftm'),
             dtype=np.float32,
             skipinitialspace=True,
-            # nrows=100
         )
         processed_df = df_full.apply(process_row, axis=1)
-
-        wins = processed_df['Wteam'].value_counts(sort=False).sort_index().astype(np.float32).rename("wins")
-        losses = processed_df['Lteam'].value_counts(sort=False).sort_index().astype(np.float32).rename("losses")
-
         w_split_df = processed_df.filter(axis=1, regex="^W")
         l_split_df = processed_df.filter(axis=1, regex="^L")
-        w_avg_df = w_split_df.groupby('Wteam', as_index=True).aggregate(np.mean)
-        l_avg_df = l_split_df.groupby('Lteam', as_index=True).aggregate(np.mean)
+        w_split_df = pd.concat([processed_df['Season'], w_split_df], axis=1)
+        l_split_df = pd.concat([processed_df['Season'], l_split_df], axis=1)
 
-        team_avgs_df = pd.concat([w_avg_df, wins, l_avg_df, losses], axis=1)
+        wins = w_split_df.groupby(['Season', 'Wteam'], as_index=True).size().rename("Wins").rename_axis(['Season', 'Team'])
+        losses = l_split_df.groupby(['Season', 'Lteam'], as_index=True).size().rename("Losses").rename_axis(['Season', 'Team'])
+        w_avg_df = w_split_df.groupby(['Season', 'Wteam'], as_index=True).mean().rename_axis(['Season', 'Team'])
+        l_avg_df = l_split_df.groupby(['Season', 'Lteam'], as_index=True).mean().rename_axis(['Season', 'Team'])
+
+        team_avgs_df = pd.concat([wins, w_avg_df, losses, l_avg_df], axis=1)
 
         team_avgs_df.to_csv(AVG_FILEPATH)
         print("Finished calculating team averages!")
