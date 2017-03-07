@@ -1,8 +1,4 @@
 import tensorflow as tf
-import numpy as np
-import pandas as pd
-from pathlib import Path
-from sklearn.model_selection import train_test_split
 import random
 from time import strftime
 
@@ -13,14 +9,15 @@ class LogisticRegression:
         self.__seed = random.randint(0, 2**31) if seed is None else seed
         self.__beta = beta
         self.__graph = tf.Graph()
+        num_features = x_train.shape[1]
         with self.__graph.as_default():
             # SETUP THE MODEL
             # Symbolic Vars
-            self.__X = tf.placeholder(tf.float32, (None, 5), name="Features")
+            self.__X = tf.placeholder(tf.float32, (None, num_features), name="Features")
             self.__Y = tf.placeholder(tf.float32, (None, 1), name="Targets")
 
             # Parameters
-            w = tf.Variable(tf.random_normal((5, 1), stddev=0.1, dtype=tf.float32, seed=self.__seed, name="Parameters"))
+            w = tf.Variable(tf.random_normal((num_features, 1), stddev=0.1, dtype=tf.float32, seed=self.__seed, name="Parameters"))
             b = tf.Variable(tf.random_normal((1,), stddev=0.1, dtype=tf.float32, seed=self.__seed, name="Bias"))
 
             # Output Function (before sigmoid, passed to the loss function)

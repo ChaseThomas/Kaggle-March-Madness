@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-FILEPATH = "data/processed.csv"
+AVG_FILEPATH = "data/team_averages.csv"
 
 
 def shooting(fgm, fga, fgm3):
@@ -55,42 +55,64 @@ def process_row(x):
     w_freethrows = freethrows(x['Wftm'], x['Wfta'])
     l_freethrows = freethrows(x['Lftm'], x['Lfta'])
     result = {
-        'def_rebounds': w_def_rebounds - l_def_rebounds,
-        'freethrows': w_freethrows - l_freethrows,
-        'off_rebounds': w_off_rebounds - l_off_rebounds,
-        'shooting': w_shooting - l_shooting,
-        'turnovers': w_turnovers - l_turnovers,
+        'Season': x['Season'],
+        'Wteam': x['Wteam'],
+        'Wdef_rebounds': w_def_rebounds,
+        'Wfreethrows': w_freethrows,
+        'Woff_rebounds': w_off_rebounds,
+        'Wshooting': w_shooting,
+        'Wturnovers': w_turnovers,
+        'Lteam': x['Lteam'],
+        'Ldef_rebounds': l_def_rebounds,
+        'Lfreethrows': l_freethrows,
+        'Loff_rebounds': l_off_rebounds,
+        'Lshooting': l_shooting,
+        'Lturnovers': l_turnovers,
     }
     return pd.Series(result)
 
 
-def preprocess():
-    processed_file = Path(FILEPATH)
+def load_tourney_results():
+    processed_file = Path()
+    print("Loading Tournament Results")
+    df_full = pd.read_csv(
+        "data/TourneyCompactResults.csv",
+        usecols=('Wteam', 'Lteam'),
+        dtype=np.float32,
+        skipinitialspace=True
+    )
+    print(df_full)
+
+
+def preprocess_team_avg():
+    processed_file = Path(AVG_FILEPATH)
     if processed_file.is_file():
-        print("Loading preprocessed data!")
-        processed_df = pd.read_csv(processed_file, dtype=np.float32, skipinitialspace=True)
-        print("Finished loading data!")
+        print("Loading team averages!")
+        team_avgs_df = pd.read_csv(processed_file, index_col=0, dtype=np.float32, skipinitialspace=True)
+        print("Finished loading team averages!")
     else:
-        print("Calculating data for preprocessing!")
+        print("Calculating team averages!")
         df_full = pd.read_csv(
             "data/RegularSeasonDetailedResults.csv",
-            usecols=('Wfgm',  'Lfgm',  'Wfga',  'Lfga',  'Wfgm3', 'Lfgm3', 'Wto',   'Lto',
+            usecols=('Season', 'Wteam', 'Lteam', 'Wfgm',  'Lfgm',  'Wfga',  'Lfga',  'Wfgm3', 'Lfgm3', 'Wto', 'Lto',
                      'Wfta',  'Lfta',  'Wor',   'Lor',   'Wdr',   'Ldr',   'Wftm',  'Lftm'),
             dtype=np.float32,
-            skipinitialspace=True)
+            skipinitialspace=True,
+            # nrows=100
+        )
         processed_df = df_full.apply(process_row, axis=1)
-        processed_df.to_csv(FILEPATH, index=False)
-        print("Finished calculating data for preprocessing!")
 
-    # Setup x_matrix
-    x_matrix = processed_df.values
-    x_matrix = np.repeat(x_matrix, 2, axis=0)  # Duplicate each row
-    x_matrix[1::2, :] *= -1.0  # Invert every other row to represent losers
+        wins = processed_df['Wteam'].value_counts(sort=False).sort_index().astype(np.float32).rename("wins")
+        losses = processed_df['Lteam'].value_counts(sort=False).sort_index().astype(np.float32).rename("losses")
 
-    # Setup y_matrix
-    y_matrix = np.empty((x_matrix.shape[0], 1), dtype=np.float32)
+        w_split_df = processed_df.filter(axis=1, regex="^W")
+        l_split_df = processed_df.filter(axis=1, regex="^L")
+        w_avg_df = w_split_df.groupby('Wteam', as_index=True).aggregate(np.mean)
+        l_avg_df = l_split_df.groupby('Lteam', as_index=True).aggregate(np.mean)
 
-    y_matrix[::2] = 1.0  # Winners
-    y_matrix[1::2] = 0.0  # Losers
+        team_avgs_df = pd.concat([w_avg_df, wins, l_avg_df, losses], axis=1)
 
-    return x_matrix, y_matrix
+        team_avgs_df.to_csv(AVG_FILEPATH)
+        print("Finished calculating team averages!")
+
+    return team_avgs_df
