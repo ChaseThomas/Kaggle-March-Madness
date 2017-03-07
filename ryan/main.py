@@ -8,8 +8,8 @@ SEED = 1337
 
 
 def main():
-    # load_tourney_results()
-    preprocess_team_avg()
+    results_df = load_tourney_results()
+    team_avg_df = preprocess_team_avg()
     # Split data into testing and training sets
 ''' x_train, x_test, y_train, y_test = train_test_split(
         x_matrix, y_matrix, test_size=0.2, random_state=SEED

@@ -73,15 +73,15 @@ def process_row(x):
 
 
 def load_tourney_results():
-    processed_file = Path()
     print("Loading Tournament Results")
     df_full = pd.read_csv(
         "data/TourneyCompactResults.csv",
-        usecols=('Wteam', 'Lteam'),
+        usecols=('Season', 'Wteam', 'Lteam'),
         dtype=np.float32,
-        skipinitialspace=True
+        skipinitialspace=True,
+        index_col='Season'
     )
-    print(df_full)
+    return df_full
 
 
 def preprocess_team_avg():
@@ -89,7 +89,6 @@ def preprocess_team_avg():
     if processed_file.is_file():
         print("Loading team averages!")
         team_avgs_df = pd.read_csv(processed_file, index_col=[0, 1], dtype=np.float32, skipinitialspace=True)
-        print(team_avgs_df)
         print("Finished loading team averages!")
     else:
         print("Calculating team averages!")
@@ -112,8 +111,12 @@ def preprocess_team_avg():
         l_avg_df = l_split_df.groupby(['Season', 'Lteam'], as_index=True).mean().rename_axis(['Season', 'Team'])
 
         team_avgs_df = pd.concat([wins, w_avg_df, losses, l_avg_df], axis=1)
-
+        team_avgs_df = team_avgs_df.fillna(0.0)
         team_avgs_df.to_csv(AVG_FILEPATH)
         print("Finished calculating team averages!")
 
     return team_avgs_df
+
+
+def dataset_to_numpy(team_avgs_df):
+    pass
