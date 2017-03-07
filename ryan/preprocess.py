@@ -118,5 +118,21 @@ def preprocess_team_avg():
     return team_avgs_df
 
 
-def dataset_to_numpy(team_avgs_df):
-    pass
+def datasets_to_numpy(team_avgs_df, tourney_results_df):
+    regular_matrix = team_avgs_df.reset_index().values
+    tourney_matrix = tourney_results_df.reset_index().values
+    tourney_matrix = tourney_matrix[tourney_matrix[:, 0] >= 2003.0]
+    num_features = (regular_matrix.shape[1] - 2) * 2
+    x_matrix = np.empty((tourney_matrix.shape[0] * 2, num_features), dtype=np.float32)
+    y_matrix = np.empty((tourney_matrix.shape[0] * 2, 1))
+    for row in range(tourney_matrix.shape[0]):
+        matched_season = regular_matrix[regular_matrix[:, 0] == tourney_matrix[row, 0]]
+        w_team_avgs = matched_season[matched_season[:, 1] == tourney_matrix[row, 1]][0]
+        l_team_avgs = matched_season[matched_season[:, 1] == tourney_matrix[row, 2]][0]
+        x_matrix[2 * row] = np.concatenate((w_team_avgs[2:], l_team_avgs[2:]))
+        x_matrix[2 * row + 1] = np.concatenate((l_team_avgs[2:], w_team_avgs[2:]))
+        #x_matrix[2*row] = w_team_avgs[2:] - l_team_avgs[2:]
+        #x_matrix[2*row+1] = l_team_avgs[2:] - w_team_avgs[2:]
+        y_matrix[2 * row] = 1.0
+        y_matrix[2 * row + 1] = 0.0
+    return x_matrix, y_matrix

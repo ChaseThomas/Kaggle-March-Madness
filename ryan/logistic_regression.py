@@ -1,6 +1,7 @@
 import tensorflow as tf
 import random
 from time import strftime
+from time import time
 
 
 class LogisticRegression:
@@ -61,9 +62,12 @@ class LogisticRegression:
 
                     # Training loop for parameter tuning
                     print("Starting training for %d epochs" % num_epochs)
+                    last_time = time()
                     for epoch in range(num_epochs):
                         _, cost_val = self.sess.run([train_step, cost], feed_dict={self.__X: x_train, self.__Y: y_train})
-                        if epoch % 100 == 0:
+                        current_time = time()
+                        if (current_time-last_time) >= 5:
+                            last_time = current_time
                             print("Current Cost Value: %f, Percent Complete: %f" % (cost_val, epoch/num_epochs))
                     print("Completed Training.")
 
