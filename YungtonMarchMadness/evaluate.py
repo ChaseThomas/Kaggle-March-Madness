@@ -63,3 +63,13 @@ def evaluate_algorithm(algorithm, dataset, n_folds, *args):
         accuracy = accuracy_metric(actual, predicted)
         scores.append(accuracy)
     return sum(scores) / len(scores)
+
+
+def evaluate_algorithm_on_test_data(algorithm, dataset, test, *args):
+    minmax = dataset_minmax(dataset)
+    normalize_dataset(dataset, minmax)
+    predicted = algorithm(dataset, test, *args)
+    actual = [row[-1] for row in test]
+    return accuracy_metric(actual, predicted)
+
+

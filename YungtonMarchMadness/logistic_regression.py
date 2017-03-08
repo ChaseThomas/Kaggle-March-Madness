@@ -11,7 +11,7 @@ def predict(row, coefficients):
 def stochastic_gradient_descent(train, learn_rate, num_epochs):
     coef = [0.0] * (len(train[0]))
     for epoch in range(num_epochs):
-        print epoch
+        # print epoch
         sum_error = 0
         for row in train:
             yhat = predict(row, coef)
@@ -27,7 +27,7 @@ def stochastic_gradient_descent(train, learn_rate, num_epochs):
 # Linear Regression Algorithm With Stochastic Gradient Descent
 def logistic_regression(train, test, l_rate, n_epoch):
     predictions = list()
-    print "gradient descent"
+    # print "gradient descent"
     coef = stochastic_gradient_descent(train, l_rate, n_epoch)
     for row in test:
         yhat = predict(row, coef)
