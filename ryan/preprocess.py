@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-AVG_FILEPATH = "data/team_averages.csv"
-MASSEY_FILEPATH = "data/massey_processed.csv"
+AVG_FILEPATH = "data/processed/team_averages.csv"
+MASSEY_FILEPATH = "data/processed/massey_ordinals.csv"
 
 
 def shooting(fgm, fga, fgm3):
@@ -88,10 +88,10 @@ def load_tourney_results():
 def preprocess_massey():
     processed_file = Path(MASSEY_FILEPATH)
     if processed_file.is_file():
-        print("Loading Massey Ordinals")
+        print("Loading Massey Ordinals...")
         ordinals_previous_df = pd.read_csv(processed_file, index_col=['season','team'], dtype=np.float32, skipinitialspace=True)
     else:
-        print("Preprocessing Massey Ordinals!")
+        print("Preprocessing Massey Ordinals...")
         ordinals_previous_df = pd.read_csv("data/massey_ordinals_2003-2016.csv", index_col=['season', 'team'], skipinitialspace=True)
         ordinals_previous_df = ordinals_previous_df[ordinals_previous_df.sys_name == 'BWE']
         del ordinals_previous_df['sys_name']
@@ -101,7 +101,7 @@ def preprocess_massey():
         ordinals_previous_df = ordinals_previous_df[ordinals_previous_df['season'] >= 2010]
         ordinals_previous_df = ordinals_previous_df.set_index(['season', 'team'])'''
         ordinals_previous_df = ordinals_previous_df.astype(dtype=np.float32)
-        # ordinals_previous_df.to_csv(MASSEY_FILEPATH)
+        ordinals_previous_df.to_csv(MASSEY_FILEPATH)
         print("Finished preprocessing Massey Ordinals!")
     return ordinals_previous_df
 
@@ -109,10 +109,10 @@ def preprocess_massey():
 def preprocess_team_avg():
     processed_file = Path(AVG_FILEPATH)
     if processed_file.is_file():
-        print("Loading team averages")
+        print("Loading team averages...")
         team_avgs_df = pd.read_csv(processed_file, index_col=[0, 1], dtype=np.float32, skipinitialspace=True)
     else:
-        print("Calculating team averages!")
+        print("Calculating team averages...")
         df_full = pd.read_csv(
             "data/RegularSeasonDetailedResults.csv",
             usecols=('Season', 'Wteam', 'Lteam', 'Wfgm',  'Lfgm',  'Wfga',  'Lfga',  'Wfgm3', 'Lfgm3', 'Wto', 'Lto',
@@ -172,8 +172,9 @@ def dataframes_to_matricies(team_avgs_df, massey_ordinals_df, tourney_results_df
         # populate x_matrix with stats independent of victory state
         x_matrix[2 * row] = np.concatenate((delta_massey, w_team_avgs[2:], l_team_avgs[2:]))
         x_matrix[2 * row + 1] = np.concatenate((-delta_massey, l_team_avgs[2:], w_team_avgs[2:]))
-        #x_matrix[2*row] = w_team_avgs[2:] - l_team_avgs[2:]
-        #x_matrix[2*row+1] = l_team_avgs[2:] - w_team_avgs[2:]
+
+        # assign victory status
         y_matrix[2 * row] = 1.0
         y_matrix[2 * row + 1] = 0.0
+
     return x_matrix, y_matrix
