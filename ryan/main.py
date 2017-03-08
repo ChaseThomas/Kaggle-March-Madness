@@ -23,14 +23,17 @@ def main():
     )
 
     print("Beginning Logistic Regression Demo")
-    scaler = preprocessing.StandardScaler()
+    regression = LogisticRegression(x_train, y_train, num_epochs=250000, beta=0.01, seed=SEED)
+    print("Test Accuracy: %f" % regression.test_accuracy(x_test, y_test))
+
+    '''scaler = preprocessing.StandardScaler()
     scaler.fit(x_train)
     regression = LogisticRegression(scaler.transform(x_train), y_train, num_epochs=250000, beta=0.01, seed=SEED)
-    print("Test Accuracy: %f" % regression.test_accuracy(scaler.transform(x_test), y_test))
-    # regression.save_model()
+    print("Test Accuracy: %f" % regression.test_accuracy(scaler.transform(x_test), y_test))'''
 
+    regression.save_model()
 
-'''print("Beginning Decision Tree Demo")
+    '''print("Beginning Decision Tree Demo")
     tree = train_tree(x_train, y_train, seed=SEED)
     print("Finished training tree")
 
