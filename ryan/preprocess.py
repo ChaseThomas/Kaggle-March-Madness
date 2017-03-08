@@ -3,6 +3,7 @@ import pandas as pd
 from pathlib import Path
 
 AVG_FILEPATH = "data/team_averages.csv"
+MASSEY_FILEPATH = "data/massey_processed.csv"
 
 
 def shooting(fgm, fga, fgm3):
@@ -84,12 +85,32 @@ def load_tourney_results():
     return df_full
 
 
+def preprocess_massey():
+    processed_file = Path(MASSEY_FILEPATH)
+    if processed_file.is_file():
+        print("Loading Massey Ordinals")
+        ordinals_previous_df = pd.read_csv(processed_file, index_col=['season','team'], dtype=np.float32, skipinitialspace=True)
+    else:
+        print("Preprocessing Massey Ordinals!")
+        ordinals_previous_df = pd.read_csv("data/massey_ordinals_2003-2016.csv", index_col=['season', 'team'], skipinitialspace=True)
+        ordinals_previous_df = ordinals_previous_df[ordinals_previous_df.sys_name == 'BWE']
+        del ordinals_previous_df['sys_name']
+        ordinals_previous_df = ordinals_previous_df[ordinals_previous_df.rating_day_num == 133]
+        del ordinals_previous_df['rating_day_num']
+        '''ordinals_previous_df = ordinals_previous_df.reset_index()
+        ordinals_previous_df = ordinals_previous_df[ordinals_previous_df['season'] >= 2010]
+        ordinals_previous_df = ordinals_previous_df.set_index(['season', 'team'])'''
+        ordinals_previous_df = ordinals_previous_df.astype(dtype=np.float32)
+        # ordinals_previous_df.to_csv(MASSEY_FILEPATH)
+        print("Finished preprocessing Massey Ordinals!")
+    return ordinals_previous_df
+
+
 def preprocess_team_avg():
     processed_file = Path(AVG_FILEPATH)
     if processed_file.is_file():
-        print("Loading team averages!")
+        print("Loading team averages")
         team_avgs_df = pd.read_csv(processed_file, index_col=[0, 1], dtype=np.float32, skipinitialspace=True)
-        print("Finished loading team averages!")
     else:
         print("Calculating team averages!")
         df_full = pd.read_csv(
@@ -118,19 +139,39 @@ def preprocess_team_avg():
     return team_avgs_df
 
 
-def datasets_to_numpy(team_avgs_df, tourney_results_df):
+def dataframes_to_matricies(team_avgs_df, massey_ordinals_df, tourney_results_df):
     regular_matrix = team_avgs_df.reset_index().values
     tourney_matrix = tourney_results_df.reset_index().values
     tourney_matrix = tourney_matrix[tourney_matrix[:, 0] >= 2003.0]
-    num_features = (regular_matrix.shape[1] - 2) * 2
+    massey_matrix = massey_ordinals_df.reset_index().values
+
+    # only incorporate data that has massey rankings for those seasons
+    tourney_matrix = tourney_matrix[np.logical_or.reduce([tourney_matrix[:, 0] == x for x in np.asarray(massey_matrix[:, 0])])]
+    regular_matrix = regular_matrix[np.logical_or.reduce([regular_matrix[:, 0] == x for x in np.asarray(massey_matrix[:, 0])])]
+
+    num_features = (regular_matrix.shape[1] - 2) * 2 + 1
     x_matrix = np.empty((tourney_matrix.shape[0] * 2, num_features), dtype=np.float32)
     y_matrix = np.empty((tourney_matrix.shape[0] * 2, 1))
+
     for row in range(tourney_matrix.shape[0]):
-        matched_season = regular_matrix[regular_matrix[:, 0] == tourney_matrix[row, 0]]
-        w_team_avgs = matched_season[matched_season[:, 1] == tourney_matrix[row, 1]][0]
-        l_team_avgs = matched_season[matched_season[:, 1] == tourney_matrix[row, 2]][0]
-        x_matrix[2 * row] = np.concatenate((w_team_avgs[2:], l_team_avgs[2:]))
-        x_matrix[2 * row + 1] = np.concatenate((l_team_avgs[2:], w_team_avgs[2:]))
+        # filter regular by season
+        regular_matched_season = regular_matrix[regular_matrix[:, 0] == tourney_matrix[row, 0]]
+
+        # filter massey by season
+        massey_matched_season = massey_matrix[massey_matrix[:, 0] == tourney_matrix[row, 0]]
+
+        # get avgs for the winning and losing teams
+        w_team_avgs = regular_matched_season[regular_matched_season[:, 1] == tourney_matrix[row, 1]][0]
+        l_team_avgs = regular_matched_season[regular_matched_season[:, 1] == tourney_matrix[row, 2]][0]
+
+        # get massey ordinals for the winning and losing teams
+        w_massey = massey_matched_season[massey_matched_season[:, 1] == tourney_matrix[row, 1]][0][2:]
+        l_massey = massey_matched_season[massey_matched_season[:, 1] == tourney_matrix[row, 2]][0][2:]
+        delta_massey = w_massey - l_massey
+
+        # populate x_matrix with stats independent of victory state
+        x_matrix[2 * row] = np.concatenate((delta_massey, w_team_avgs[2:], l_team_avgs[2:]))
+        x_matrix[2 * row + 1] = np.concatenate((-delta_massey, l_team_avgs[2:], w_team_avgs[2:]))
         #x_matrix[2*row] = w_team_avgs[2:] - l_team_avgs[2:]
         #x_matrix[2*row+1] = l_team_avgs[2:] - w_team_avgs[2:]
         y_matrix[2 * row] = 1.0
