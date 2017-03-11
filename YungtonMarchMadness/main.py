@@ -50,7 +50,7 @@ def main():
     l_rate = 0.5
     num_epochs = 100
     # print e.evaluate_algorithm(lr.logistic_regression, train_w_labels, n_folds, l_rate, num_epochs)
-    print e.evaluate_algorithm_on_test_data(lr.logistic_regression, train_w_labels, test, l_rate, num_epochs)
+    print e.evaluate_algorithm_csv(lr.logistic_regression, train_w_labels, test, l_rate, num_epochs)
 
     # Decision Tree
     # print e.evaluate_algorithm(d.decision_tree, train_w_labels, n_folds)

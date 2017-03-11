@@ -72,4 +72,15 @@ def evaluate_algorithm_on_test_data(algorithm, dataset, test, *args):
     actual = [row[-1] for row in test]
     return accuracy_metric(actual, predicted)
 
+def evaluate_algorithm_csv(algorithm, dataset, test, *args):
+    minmax = dataset_minmax(dataset)
+    normalize_dataset(dataset, minmax)
+    predicted = algorithm(dataset, test, *args)
+    print predicted
 
+    output = []
+
+    with open("yungton.csv", "w") as outfile:
+        writer = csv.writer(outfile)
+        for row in output:
+            writer.writerow(row)

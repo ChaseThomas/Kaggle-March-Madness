@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from logistic_bagging import LogReg
+from logistic import LogReg
 from tree import DeciTree
 
 data_dir = ''
@@ -34,8 +34,20 @@ def main():
     logModel.setup_model(df_results, team_aggregate)
 
     #get_prediction(array of team1s, array of team2s)
-    #print logModel.get_prediction([1101, 1181], [1181, 1102])
-    #print logModel.get_prediction_int([1101, 1181], [1181, 1102])
+
+    output = []
+    for i in xrange(1101, 1464):
+        for j in xrange(i+1, 1465):
+            try:
+                output.append([i, j, logModel.get_prediction([i], [j])])
+            except KeyError: # missing teams
+                pass
+
+    with open("jo.csv", "w") as outfile:
+        writer = csv.writer(outfile)
+        for row in output:
+            writer.writerow(row)
+
     print logModel.cross_validated_accuracy()
 
     #treeModel = DeciTree()

@@ -13,8 +13,6 @@ class LogReg():
         team1_data = self.team_data.loc[team1, :]
         team2_data = self.team_data.loc[team2, :]
 
-        print team1_data
-
         pa = self.model.predict_proba(team1_data)[:, 1]
         pb = self.model.predict_proba(team2_data)[:, 1]
 
