@@ -1,3 +1,4 @@
 .idea/
-ryan/data/
-ryan/saved-networks
+ryan/data/processed/
+ryan/saved-networks/
+ryan/__pycache__/
