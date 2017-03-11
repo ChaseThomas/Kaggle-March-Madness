@@ -4,7 +4,7 @@ import tensorflow as tf
 import random
 from time import strftime
 from time import time
-
+import errno
 
 class LogisticRegression:
 
@@ -68,6 +68,8 @@ class LogisticRegression:
                         print("Current Cost Value: %.10f, Percent Complete: %f" % (cost_val, epoch/num_epochs))
                 print("Completed Training.")
 
+                print(self.__y_hat)
+
                 # Training Summary
                 training_accuracy = self.sess.run(self.__accuracy, feed_dict={self.__X: x_train, self.__Y: y_train})
                 print("Training Accuracy: %f" % training_accuracy)
@@ -85,6 +87,10 @@ class LogisticRegression:
             print("Saving Model")
             if save_path is None:
                 save_path = "saved-networks/LogisticRegression-%s.ckpt" % strftime("%Y-%m-%d_%H-%M-%S")
-            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            try:
+                os.makedirs(os.path.dirname(save_path))
+            except OSError as e:
+                if e.errno != errno.EEXIST:
+                    raise
             path = self.__saver.save(self.sess, save_path)
             print("Model successfully saved in file: %s" % path)

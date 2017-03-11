@@ -3,9 +3,10 @@ import pandas as pd
 from pathlib import Path
 import re
 import os
+import errno
 
-AVG_FILEPATH = "data/processed/team_averages.csv"
-MASSEY_FILEPATH = "data/processed/massey_ordinals.csv"
+AVG_FILEPATH = "ryan/data/processed/team_averages.csv"
+MASSEY_FILEPATH = "ryan/data/processed/massey_ordinals.csv"
 
 
 def shooting(fgm, fga, fgm3):
@@ -77,8 +78,12 @@ def process_row(x):
 
 def load_tourney_results():
     print("Loading Tournament Results")
-    filename = "data/TourneyCompactResults.csv"
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    filename = "ryan/data/TourneyCompactResults.csv"
+    try:
+        os.makedirs(os.path.dirname(filename))
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
     df_full = pd.read_csv(
         filename,
         usecols=('Season', 'Wteam', 'Lteam'),
@@ -91,8 +96,12 @@ def load_tourney_results():
 
 def load_toruney_seeds():
     print("Loading Tournament Seeds")
-    filename = "data/TourneySeeds.csv"
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    filename = "ryan/data/TourneySeeds.csv"
+    try:
+        os.makedirs(os.path.dirname(filename))
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
     df_full = pd.read_csv(
         filename,
         skipinitialspace=True,
@@ -109,7 +118,7 @@ def preprocess_massey():
         ordinals_previous_df = pd.read_csv(processed_file, index_col=['season', 'team'], dtype=np.float32, skipinitialspace=True)
     else:
         print("Preprocessing Massey Ordinals...")
-        ordinals_previous_df = pd.read_csv("data/massey_ordinals_2003-2016.csv", index_col=['season', 'team'], skipinitialspace=True)
+        ordinals_previous_df = pd.read_csv("ryan/data/massey_ordinals_2003-2016.csv", index_col=['season', 'team'], skipinitialspace=True)
         ordinals_previous_df = ordinals_previous_df[ordinals_previous_df.sys_name == 'BWE']
         del ordinals_previous_df['sys_name']
         ordinals_previous_df = ordinals_previous_df[ordinals_previous_df.rating_day_num == 133]
@@ -119,7 +128,11 @@ def preprocess_massey():
         ordinals_previous_df = ordinals_previous_df.set_index(['season', 'team'])'''
         ordinals_previous_df = ordinals_previous_df.astype(dtype=np.float32)
 
-        os.makedirs(os.path.dirname(MASSEY_FILEPATH), exist_ok=True)
+        try:
+            os.makedirs(os.path.dirname(MASSEY_FILEPATH))
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
         ordinals_previous_df.to_csv(MASSEY_FILEPATH)
         print("Finished preprocessing Massey Ordinals!")
     return ordinals_previous_df
@@ -133,7 +146,7 @@ def preprocess_team_avg():
     else:
         print("Calculating team averages...")
         df_full = pd.read_csv(
-            "data/RegularSeasonDetailedResults.csv",
+            "ryan/data/RegularSeasonDetailedResults.csv",
             usecols=('Season', 'Wteam', 'Lteam', 'Wfgm',  'Lfgm',  'Wfga',  'Lfga',  'Wfgm3', 'Lfgm3', 'Wto', 'Lto',
                      'Wfta',  'Lfta',  'Wor',   'Lor',   'Wdr',   'Ldr',   'Wftm',  'Lftm'),
             dtype=np.float32,
@@ -153,7 +166,11 @@ def preprocess_team_avg():
         team_avgs_df = pd.concat([wins, w_avg_df, losses, l_avg_df], axis=1)
         team_avgs_df = team_avgs_df.fillna(0.0)
 
-        os.makedirs(os.path.dirname(AVG_FILEPATH), exist_ok=True)
+        try:
+            os.makedirs(os.path.dirname(AVG_FILEPATH))
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
         team_avgs_df.to_csv(AVG_FILEPATH)
         print("Finished calculating team averages!")
 
@@ -173,7 +190,7 @@ def dataframes_to_matricies(team_avgs_df, massey_ordinals_df, tourney_seeds_df, 
     seeds_matrix = seeds_matrix[np.logical_or.reduce([seeds_matrix[:, 0] == x for x in np.asarray(massey_matrix[:, 0])])]
 
     # initialize empty result matricies
-    num_features = (regular_matrix.shape[1] - 2 + 1)*2 + 1
+    num_features = (regular_matrix.shape[1] - 2 + 1) + 1
     x_matrix = np.empty((tourney_matrix.shape[0] * 2, num_features), dtype=np.float32)
     y_matrix = np.empty((tourney_matrix.shape[0] * 2,))
 
