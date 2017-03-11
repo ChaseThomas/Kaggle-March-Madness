@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from logistic import LogReg
+from logistic_bagging import LogReg
 from tree import DeciTree
 
 data_dir = ''
@@ -34,13 +34,14 @@ def main():
     logModel.setup_model(df_results, team_aggregate)
 
     #get_prediction(array of team1s, array of team2s)
-    print logModel.get_prediction([1101, 1181], [1181, 1102])
-    print logModel.get_prediction_int([1101, 1181], [1181, 1102])
+    #print logModel.get_prediction([1101, 1181], [1181, 1102])
+    #print logModel.get_prediction_int([1101, 1181], [1181, 1102])
+    print logModel.cross_validated_accuracy()
 
-    treeModel = DeciTree()
-    treeModel.setup_model(df_results, team_aggregate)
-    print treeModel.get_prediction([1101, 1181], [1181, 1102])
-    print treeModel.get_prediction_int([1101, 1181], [1181, 1102])
+    #treeModel = DeciTree()
+    #treeModel.setup_model(df_results, team_aggregate)
+    #print treeModel.get_prediction([1101, 1181], [1181, 1102])
+    #print treeModel.get_prediction_int([1101, 1181], [1181, 1102])
 
 
 
