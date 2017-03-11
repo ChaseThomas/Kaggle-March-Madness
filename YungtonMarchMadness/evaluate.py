@@ -1,5 +1,5 @@
 from random import randrange
-
+import csv
 
 # Calculate accuracy percentage
 def accuracy_metric(actual, predicted):
