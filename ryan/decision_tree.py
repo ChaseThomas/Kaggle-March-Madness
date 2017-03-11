@@ -7,7 +7,7 @@ import numpy as np
 
 def train_tree(x_data, y_data, seed=None):
     the_tree = t.DecisionTreeRegressor(random_state=seed)
-    return the_tree.fit(x_data,y_data)
+    return the_tree.fit(x_data, y_data)
 
 
 def predict(tree, x_data):

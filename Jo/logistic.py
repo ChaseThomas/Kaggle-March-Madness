@@ -51,5 +51,3 @@ class LogReg():
         
         self.model = logR
         self.team_data = team_data
-        
-        
