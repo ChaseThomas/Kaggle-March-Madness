@@ -2,3 +2,4 @@
 ryan/data/processed/
 ryan/saved-networks/
 ryan/__pycache__/
+*.pyc
