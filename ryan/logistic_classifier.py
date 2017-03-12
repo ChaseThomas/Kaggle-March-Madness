@@ -21,11 +21,11 @@ class LogisticClassifier:
 
             # Parameters
             w = tf.Variable(tf.random_normal((num_features, 2), stddev=0.1, dtype=tf.float32, seed=self.__seed, name="Parameters"))
-            #b = tf.Variable(tf.random_normal((2,), stddev=0.1, dtype=tf.float32, seed=self.__seed, name="Bias"))
+            b = tf.Variable(tf.random_normal((2,), stddev=0.1, dtype=tf.float32, seed=self.__seed, name="Bias"))
 
             # Output Function (before sigmoid, passed to the loss function)
-            #y = tf.add(tf.matmul(self.__X, w), b)
-            y = tf.matmul(self.__X, w)
+            y = tf.add(tf.matmul(self.__X, w), b)
+            #y = tf.matmul(self.__X, w)
 
             # Output Function (after sigmoid, represents the actual predicted probabilities)
             self.__y_hat = tf.nn.softmax(y, name="Y-hat")
@@ -40,7 +40,7 @@ class LogisticClassifier:
 
             # Optimizer setup
             train_step = tf.train.AdamOptimizer().minimize(cost)
-            # train_step = tf.train.MomentumOptimizer(learning_rate=0.001, momentum=0.9, use_nesterov=True).minimize(cost)
+
             # Summary data
             match_results = tf.equal(tf.cast(tf.argmax(self.__y_hat, axis=1), dtype=tf.int32), self.__Y)  # Vector of bool representing success of predictions
             self.__accuracy = tf.reduce_mean(
@@ -89,7 +89,7 @@ class LogisticClassifier:
         with self.sess.as_default():
             print("Saving Model")
             if save_path is None:
-                save_path = "saved-networks/LogisticClassifier-%s.ckpt" % strftime("%Y-%m-%d_%H-%M-%S")
+                save_path = "ryan/saved-networks/LogisticClassifier-%s.ckpt" % strftime("%Y-%m-%d_%H-%M-%S")
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
             path = self.__saver.save(self.sess, save_path)
             print("Model successfully saved in file: %s" % path)

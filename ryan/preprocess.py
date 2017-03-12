@@ -4,8 +4,8 @@ from pathlib import Path
 import re
 import os
 
-AVG_FILEPATH = "data/processed/team_averages.csv"
-MASSEY_FILEPATH = "data/processed/massey_ordinals.csv"
+AVG_FILEPATH = "ryan/data/processed/team_averages.csv"
+MASSEY_FILEPATH = "ryan/data/processed/massey_ordinals.csv"
 
 
 def shooting(fgm, fga, fgm3):
@@ -77,7 +77,7 @@ def process_row(x):
 
 def load_tourney_results():
     print("Loading Tournament Results")
-    filename = "data/TourneyCompactResults.csv"
+    filename = "ryan/data/TourneyCompactResults.csv"
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     df_full = pd.read_csv(
         filename,
@@ -91,7 +91,7 @@ def load_tourney_results():
 
 def load_toruney_seeds():
     print("Loading Tournament Seeds")
-    filename = "data/TourneySeeds.csv"
+    filename = "ryan/data/TourneySeeds.csv"
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     df_full = pd.read_csv(
         filename,
@@ -109,7 +109,7 @@ def preprocess_massey():
         ordinals_previous_df = pd.read_csv(processed_file, index_col=['season', 'team'], dtype=np.float32, skipinitialspace=True)
     else:
         print("Preprocessing Massey Ordinals...")
-        ordinals_previous_df = pd.read_csv("data/massey_ordinals_2003-2016.csv", index_col=['season', 'team'], skipinitialspace=True)
+        ordinals_previous_df = pd.read_csv("ryan/data/massey_ordinals_2003-2016.csv", index_col=['season', 'team'], skipinitialspace=True)
         ordinals_previous_df = ordinals_previous_df[ordinals_previous_df.rating_day_num == 133]
         del ordinals_previous_df['rating_day_num']
         ordinals_previous_df = ordinals_previous_df.reset_index().groupby(['season', 'team'], as_index=True).mean()
@@ -199,6 +199,9 @@ def dataframes_to_matricies(team_avgs_df, massey_ordinals_df, tourney_seeds_df, 
         l_seed = seeds_matched_season[seeds_matched_season[:, 1] == tourney_matrix[row, 2]][0][2:]
 
         # populate x_matrix with stats independent of victory state
+        #x_matrix[2 * row] = w_massey-l_massey
+        #x_matrix[2 * row + 1] = l_massey-w_massey
+
         x_matrix[2 * row] = np.concatenate((w_massey-l_massey, w_seed-l_seed, w_team_avgs[2:]-l_team_avgs[2:]))
         x_matrix[2 * row + 1] = np.concatenate((l_massey-w_massey, l_seed-w_seed, l_team_avgs[2:]-w_team_avgs[2:]))
 

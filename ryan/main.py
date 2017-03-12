@@ -9,7 +9,7 @@ from ryan.decision_tree import *
 from sklearn import preprocessing
 
 
-SEED = None
+SEED = 31337
 
 
 def main():
@@ -28,7 +28,11 @@ def main():
     print("Training size: %d, Testing size: %d" % (x_train.shape[0], x_test.shape[0]))
 
     print("Beginning Logistic Classifier Demo")
-    classifier = LogisticClassifier(x_train, y_train, num_epochs=300000, beta=0.05, seed=SEED)
+    classifier = LogisticClassifier(
+        x_train, y_train,
+        load_model="ryan/saved-networks/LogisticClassifier-2017-03-11_21-03-54.ckpt",
+        num_epochs=0, beta=0.05, seed=SEED
+    )
     print("Test Accuracy: %f" % classifier.test_accuracy(x_test, y_test))
 
     '''scaler = preprocessing.StandardScaler()
