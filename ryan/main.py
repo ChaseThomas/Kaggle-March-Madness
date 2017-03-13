@@ -6,8 +6,9 @@ from ryan.preprocess import load_toruney_seeds
 from ryan.preprocess import preprocess_massey
 from ryan.preprocess import preprocess_massey_2017
 from ryan.logistic_classifier import LogisticClassifier
-from ryan.decision_tree import *
 from sklearn import preprocessing
+import pandas as pd
+import numpy as np
 
 
 SEED = 31337
@@ -26,12 +27,12 @@ def main():
     )
 
     predictions_df = pd.DataFrame(columns=['team1', 'team2', 'season', 'predicted', 'actual'])
+    future_predictions_df = pd.DataFrame(columns=['team1', 'team2', 'predicted'])
     for season in (2014, 2015, 2016, 2017):
         tourney_df = tourney_seeds_df
         tourney_df = tourney_df[tourney_df['Season'] == season]
         del tourney_df['Season']
         tourney_df = tourney_df.sort_values('Team').reset_index(drop=True)
-        print(predictions_df)
         for idx1, row1 in tourney_df.iterrows():
             team1 = row1['Team']
             seed1 = row1['Seed']
@@ -40,6 +41,11 @@ def main():
                 seed2 = row2['Seed']
                 features = get_features(massey_ordinals_df, team_avgs_df, team1, team2, seed1, seed2, season)
                 prediction = classifier.predict_values(features)[0][0]
+                if season == 2017:
+                    future_predictions_df = future_predictions_df.append([{
+                        'team1': team1, 'team2': team2, 'predicted': prediction
+                    }], ignore_index=True)
+                    continue
                 tmp = tourney_results_df.loc[(tourney_results_df['Season'] == season)]
                 tmp1 = tmp.loc[(tmp['Wteam'] == team1) & (tmp['Lteam'] == team2)]
                 tmp2 = tmp.loc[(tmp['Wteam'] == team2) & (tmp['Lteam'] == team1)]
@@ -49,12 +55,13 @@ def main():
                     actual = 0
                 else:
                     continue
-                print(actual)
                 predictions_df = predictions_df.append([{
                     'team1': team1, 'team2': team2, 'season': season, 'predicted': prediction, 'actual': actual
                 }], ignore_index=True)
 
-    predictions_df.set_index(['team1', 'team2', 'season']).to_csv("ryan/historical.csv")
+    predictions_df.set_index(['team1', 'team2', 'season']).to_csv("ryan/historical_predictions.csv")
+    future_predictions_df.set_index(['team1', 'team2']).to_csv("ryan/future_predictions.csv")
+    predictions_2017 = predictions_df.loc[predictions_df['season'] == 2017]
 
 '''
     x_matrix, y_matrix = dataframes_to_matricies(team_avgs_df, massey_ordinals_df, tourney_seeds_df, tourney_results_df)
