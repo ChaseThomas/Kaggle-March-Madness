@@ -1,0 +1,2 @@
+model_checkpoint_path: "LogisticClassifier-2017-03-11_21-03-54.ckpt"
+all_model_checkpoint_paths: "LogisticClassifier-2017-03-11_21-03-54.ckpt"
