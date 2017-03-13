@@ -6,6 +6,7 @@ import os
 
 AVG_FILEPATH = "ryan/data/processed/team_averages.csv"
 MASSEY_FILEPATH = "ryan/data/processed/massey_ordinals.csv"
+MASSEY_2017_FILEPATH = "ryan/data/processed/massey_ordinals_2017.csv"
 
 
 def shooting(fgm, fga, fgm3):
@@ -86,7 +87,7 @@ def load_tourney_results():
         skipinitialspace=True,
         index_col='Season'
     )
-    return df_full
+    return df_full.reset_index()
 
 
 def load_toruney_seeds():
@@ -99,20 +100,34 @@ def load_toruney_seeds():
         index_col=['Season', 'Team']
     )
     df_full["Seed"] = df_full["Seed"].apply(lambda x: int(re.findall("\d+", x)[0]))
-    return df_full
+    return df_full.reset_index()
+
+
+def preprocess_massey_2017():
+    ordinals_previous_df = pd.read_csv("ryan/data/massey_ordinals_2017.csv", index_col=['season', 'team'],
+                                       skipinitialspace=True)
+    ordinals_previous_df = ordinals_previous_df[ordinals_previous_df.rating_day_num == 133]
+    del ordinals_previous_df['rating_day_num']
+    ordinals_previous_df = ordinals_previous_df.reset_index().groupby(['season', 'team'], as_index=True).mean()
+
+    os.makedirs(os.path.dirname(MASSEY_2017_FILEPATH), exist_ok=True)
+    ordinals_previous_df.to_csv(MASSEY_2017_FILEPATH)
+    return ordinals_previous_df
 
 
 def preprocess_massey():
     processed_file = Path(MASSEY_FILEPATH)
     if processed_file.is_file():
         print("Loading Massey Ordinals...")
-        ordinals_previous_df = pd.read_csv(processed_file, index_col=['season', 'team'], dtype=np.float32, skipinitialspace=True)
+        ordinals_df = pd.read_csv(processed_file, index_col=['season', 'team'], dtype=np.float32, skipinitialspace=True)
     else:
         print("Preprocessing Massey Ordinals...")
-        ordinals_previous_df = pd.read_csv("ryan/data/massey_ordinals_2003-2016.csv", index_col=['season', 'team'], skipinitialspace=True)
-        ordinals_previous_df = ordinals_previous_df[ordinals_previous_df.rating_day_num == 133]
-        del ordinals_previous_df['rating_day_num']
-        ordinals_previous_df = ordinals_previous_df.reset_index().groupby(['season', 'team'], as_index=True).mean()
+        ordinals_df = pd.read_csv("ryan/data/massey_ordinals_2003-2016.csv", index_col=['season', 'team'], skipinitialspace=True)
+        ordinals_df = ordinals_df[ordinals_df.rating_day_num == 133]
+        del ordinals_df['rating_day_num']
+        ordinals_df = ordinals_df.reset_index().groupby(['season', 'team'], as_index=True).mean()
+        ordinals_2017_df = preprocess_massey_2017()
+        ordinals_df = pd.concat([ordinals_df, ordinals_2017_df])
         '''ordinals_previous_df = ordinals_previous_df[ordinals_previous_df.sys_name == 'BWE']
         del ordinals_previous_df['sys_name']
         ordinals_previous_df = ordinals_previous_df[ordinals_previous_df.rating_day_num == 133]
@@ -122,9 +137,9 @@ def preprocess_massey():
         ordinals_previous_df = ordinals_previous_df.set_index(['season', 'team'])'''
 
         os.makedirs(os.path.dirname(MASSEY_FILEPATH), exist_ok=True)
-        ordinals_previous_df.to_csv(MASSEY_FILEPATH)
+        ordinals_df.to_csv(MASSEY_FILEPATH)
         print("Finished preprocessing Massey Ordinals!")
-    return ordinals_previous_df
+    return ordinals_df.reset_index()
 
 
 def preprocess_team_avg():
@@ -135,7 +150,7 @@ def preprocess_team_avg():
     else:
         print("Calculating team averages...")
         df_full = pd.read_csv(
-            "data/RegularSeasonDetailedResults.csv",
+            "ryan/data/RegularSeasonDetailedResults.csv",
             usecols=('Season', 'Wteam', 'Lteam', 'Wfgm',  'Lfgm',  'Wfga',  'Lfga',  'Wfgm3', 'Lfgm3', 'Wto', 'Lto',
                      'Wfta',  'Lfta',  'Wor',   'Lor',   'Wdr',   'Ldr',   'Wftm',  'Lftm'),
             dtype=np.float32,
@@ -159,7 +174,7 @@ def preprocess_team_avg():
         team_avgs_df.to_csv(AVG_FILEPATH)
         print("Finished calculating team averages!")
 
-    return team_avgs_df
+    return team_avgs_df.reset_index()
 
 
 def dataframes_to_matricies(team_avgs_df, massey_ordinals_df, tourney_seeds_df, tourney_results_df):
