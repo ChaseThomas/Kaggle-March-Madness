@@ -1,0 +1,365 @@
+"Team_Id","Team_Name","Elo"
+1101,"Abilene Chr",2895
+1102,"Air Force",6135
+1103,"Akron",6270
+1104,"Alabama",6255
+1105,"Alabama A&M",6180
+1106,"Alabama St",6195
+1107,"Albany NY",6165
+1108,"Alcorn St",6210
+1109,"Alliant Intl",1500
+1110,"American Univ",6255
+1111,"Appalachian St",6135
+1112,"Arizona",6210
+1113,"Arizona St",6195
+1114,"Ark Little Rock",6150
+1115,"Ark Pine Bluff",6165
+1116,"Arkansas",6270
+1117,"Arkansas St",6150
+1118,"Armstrong St",1500
+1119,"Army",6255
+1120,"Auburn",6240
+1121,"Augusta",1500
+1122,"Austin Peay",6000
+1123,"Ball St",6255
+1124,"Baylor",6255
+1125,"Belmont",6015
+1126,"Bethune-Cookman",6075
+1127,"Binghamton",6135
+1128,"Birmingham So",2745
+1129,"Boise St",6135
+1130,"Boston College",6210
+1131,"Boston Univ",6270
+1132,"Bowling Green",6240
+1133,"Bradley",6255
+1134,"Brooklyn",1500
+1135,"Brown",6180
+1136,"Bryant",5565
+1137,"Bucknell",6285
+1138,"Buffalo",6240
+1139,"Butler",6210
+1140,"BYU",6195
+1141,"C Michigan",6240
+1142,"Cal Poly SLO",6105
+1143,"California",6195
+1144,"Campbell",6075
+1145,"Canisius",6225
+1146,"Cent Arkansas",5640
+1147,"Centenary",4095
+1148,"Central Conn",6180
+1149,"Charleston So",6060
+1150,"Charlotte",6180
+1151,"Chattanooga",6090
+1152,"Chicago St",5565
+1153,"Cincinnati",6210
+1154,"Citadel",6090
+1155,"Clemson",6210
+1156,"Cleveland St",6120
+1157,"Coastal Car",6150
+1158,"Col Charleston",6285
+1159,"Colgate",6255
+1160,"Colorado",6195
+1161,"Colorado St",6150
+1162,"Columbia",6180
+1163,"Connecticut",6210
+1164,"Coppin St",6075
+1165,"Cornell",6180
+1166,"Creighton",6240
+1167,"CS Bakersfield",5400
+1168,"CS Fullerton",6120
+1169,"CS Northridge",6105
+1170,"CS Sacramento",6000
+1171,"Dartmouth",6180
+1172,"Davidson",6270
+1173,"Dayton",6255
+1174,"Delaware",6255
+1175,"Delaware St",6075
+1176,"Denver",5775
+1177,"DePaul",6225
+1178,"Detroit",6120
+1179,"Drake",6255
+1180,"Drexel",6255
+1181,"Duke",6240
+1182,"Duquesne",6255
+1183,"E Illinois",5970
+1184,"E Kentucky",6000
+1185,"E Michigan",6240
+1186,"E Washington",6015
+1187,"East Carolina",6195
+1188,"Edwardsville",4800
+1189,"Elon",6255
+1190,"ETSU",6120
+1191,"Evansville",6255
+1192,"F Dickinson",6195
+1193,"Fairfield",6225
+1194,"FL Atlantic",6180
+1195,"FL Gulf Coast",5685
+1196,"Florida",6240
+1197,"Florida A&M",6075
+1198,"Florida Intl",6165
+1199,"Florida St",6225
+1200,"Fordham",6255
+1201,"Fresno St",6135
+1202,"Furman",6090
+1203,"G Washington",6255
+1204,"Ga Southern",6135
+1205,"Gardner Webb",6060
+1206,"George Mason",6255
+1207,"Georgetown",6210
+1208,"Georgia",6240
+1209,"Georgia St",6150
+1210,"Georgia Tech",6210
+1211,"Gonzaga",6210
+1212,"Grambling",6210
+1213,"Grand Canyon",3165
+1214,"Hampton",6075
+1215,"Hardin-Simmons",1500
+1216,"Hartford",6150
+1217,"Harvard",6195
+1218,"Hawaii",6090
+1219,"High Point",6045
+1220,"Hofstra",6255
+1221,"Holy Cross",6255
+1222,"Houston",6195
+1223,"Houston Bap",5085
+1224,"Howard",6090
+1225,"Idaho",6000
+1226,"Idaho St",5985
+1227,"IL Chicago",6135
+1228,"Illinois",6210
+1229,"Illinois St",6285
+1230,"Incarnate Word",2835
+1231,"Indiana",6210
+1232,"Indiana St",6255
+1233,"Iona",6255
+1234,"Iowa",6210
+1235,"Iowa St",6285
+1236,"IPFW",5760
+1237,"IUPUI",5760
+1238,"Jackson St",6195
+1239,"Jacksonville",5700
+1240,"Jacksonville St",6030
+1241,"James Madison",6255
+1242,"Kansas",6255
+1243,"Kansas St",6270
+1244,"Kennesaw",5700
+1245,"Kent",6270
+1246,"Kentucky",6270
+1247,"La Salle",6255
+1248,"Lafayette",6255
+1249,"Lamar",5790
+1250,"Lehigh",6285
+1251,"Liberty",6045
+1252,"Lipscomb",5715
+1253,"Long Beach St",6105
+1254,"Long Island",6195
+1255,"Longwood",6060
+1256,"Louisiana Tech",6195
+1257,"Louisville",6210
+1258,"Loy Marymount",6180
+1259,"Loyola MD",6255
+1260,"Loyola-Chicago",6255
+1261,"LSU",6240
+1262,"MA Lowell",3195
+1263,"Maine",6135
+1264,"Manhattan",6225
+1265,"Marist",6225
+1266,"Marquette",6210
+1267,"Marshall",6210
+1268,"Maryland",6210
+1269,"Massachusetts",6255
+1270,"McNeese St",5775
+1271,"MD E Shore",6075
+1272,"Memphis",6180
+1273,"Mercer",6090
+1274,"Miami FL",6210
+1275,"Miami OH",6240
+1276,"Michigan",6240
+1277,"Michigan St",6225
+1278,"Minnesota",6225
+1279,"Mississippi",6240
+1280,"Mississippi St",6240
+1281,"Missouri",6240
+1282,"Missouri KC",5580
+1283,"Missouri St",6270
+1284,"Monmouth NJ",6240
+1285,"Montana",6000
+1286,"Montana St",6000
+1287,"Morehead St",6015
+1288,"Morgan St",6075
+1289,"Morris Brown",1800
+1290,"MS Valley St",6180
+1291,"Mt St Mary's",6225
+1292,"MTSU",6210
+1293,"Murray St",6015
+1294,"N Colorado",5970
+1295,"N Dakota St",5745
+1296,"N Illinois",6240
+1297,"N Kentucky",3675
+1298,"Navy",6270
+1299,"NC A&T",6060
+1300,"NC Central",5685
+1301,"NC State",6195
+1302,"NE Illinois",1500
+1303,"NE Omaha",3885
+1304,"Nebraska",6210
+1305,"Nevada",6150
+1306,"New Hampshire",6150
+1307,"New Mexico",6120
+1308,"New Mexico St",5655
+1309,"New Orleans",5610
+1310,"Niagara",6225
+1311,"Nicholls St",5775
+1312,"NJIT",5505
+1313,"Norfolk St",6090
+1314,"North Carolina",6225
+1315,"North Dakota",5070
+1316,"North Florida",5715
+1317,"North Texas",6165
+1318,"Northeastern",6255
+1319,"Northern Arizona",5985
+1320,"Northern Iowa",6255
+1321,"Northwestern",6225
+1322,"Northwestern LA",5775
+1323,"Notre Dame",6240
+1324,"Oakland",6120
+1325,"Ohio",6255
+1326,"Ohio St",6210
+1327,"Okla City",1500
+1328,"Oklahoma",6255
+1329,"Oklahoma St",6255
+1330,"Old Dominion",6180
+1331,"Oral Roberts",5730
+1332,"Oregon",6210
+1333,"Oregon St",6180
+1334,"Pacific",6180
+1335,"Penn",6195
+1336,"Penn St",6225
+1337,"Pepperdine",6180
+1338,"Pittsburgh",6210
+1339,"Portland",6180
+1340,"Portland St",5985
+1341,"Prairie View",6195
+1342,"Presbyterian",5775
+1343,"Princeton",6210
+1344,"Providence",6225
+1345,"Purdue",6195
+1346,"Quinnipiac",6225
+1347,"Radford",6060
+1348,"Rhode Island",6285
+1349,"Rice",6180
+1350,"Richmond",6270
+1351,"Rider",6225
+1352,"Robert Morris",6210
+1353,"Rutgers",6210
+1354,"S Carolina St",6075
+1355,"S Dakota St",5775
+1356,"S Illinois",6270
+1357,"Sacred Heart",6210
+1358,"Sam Houston St",5775
+1359,"Samford",6105
+1360,"San Diego",6180
+1361,"San Diego St",6150
+1362,"San Francisco",6180
+1363,"San Jose St",6135
+1364,"Santa Barbara",6090
+1365,"Santa Clara",6195
+1366,"Savannah St",6060
+1367,"SC Upstate",5640
+1368,"SE Louisiana",5775
+1369,"SE Missouri St",6015
+1370,"Seattle",4995
+1371,"Seton Hall",6225
+1372,"SF Austin",5790
+1373,"Siena",6255
+1374,"SMU",6210
+1375,"South Alabama",6135
+1376,"South Carolina",6240
+1377,"South Dakota",4935
+1378,"South Florida",6195
+1379,"Southern Miss",6180
+1380,"Southern Univ",6195
+1381,"Southern Utah",6000
+1382,"St Bonaventure",6255
+1383,"St Francis NY",6195
+1384,"St Francis PA",6225
+1385,"St John's",6210
+1386,"St Joseph's PA",6255
+1387,"St Louis",6255
+1388,"St Mary's CA",6210
+1389,"St Peter's",6240
+1390,"Stanford",6195
+1391,"Stetson",5700
+1392,"Stony Brook",6150
+1393,"Syracuse",6210
+1394,"TAM C. Christi",5775
+1395,"TCU",6270
+1396,"Temple",6195
+1397,"Tennessee",6240
+1398,"Tennessee St",6015
+1399,"Tennessee Tech",6015
+1400,"Texas",6255
+1401,"Texas A&M",6240
+1402,"Texas St",6165
+1403,"Texas Tech",6255
+1404,"TN Martin",6030
+1405,"Toledo",6240
+1406,"Towson",6270
+1407,"Troy",6165
+1408,"Tulane",6195
+1409,"Tulsa",6195
+1410,"UTRGV",5565
+1411,"TX Southern",6210
+1412,"UAB",6180
+1413,"UC Davis",6120
+1414,"UC Irvine",6120
+1415,"UC Riverside",6090
+1416,"UCF",6195
+1417,"UCLA",6210
+1418,"ULL",6150
+1419,"ULM",6150
+1420,"UMBC",6135
+1421,"UNC Asheville",6045
+1422,"UNC Greensboro",6120
+1423,"UNC Wilmington",6285
+1424,"UNLV",6135
+1425,"USC",6195
+1426,"UT Arlington",6165
+1427,"UT San Antonio",6180
+1428,"Utah",6195
+1429,"Utah St",6135
+1430,"Utah Valley",5385
+1431,"UTEP",6195
+1432,"Utica",1500
+1433,"VA Commonwealth",6285
+1434,"Valparaiso",6105
+1435,"Vanderbilt",6255
+1436,"Vermont",6165
+1437,"Villanova",6240
+1438,"Virginia",6210
+1439,"Virginia Tech",6210
+1440,"VMI",6090
+1441,"W Carolina",6090
+1442,"W Illinois",5745
+1443,"WKU",6180
+1444,"W Michigan",6240
+1445,"W Salem St",3060
+1446,"W Texas A&M",1500
+1447,"Wagner",6210
+1448,"Wake Forest",6210
+1449,"Washington",6195
+1450,"Washington St",6195
+1451,"Weber St",6015
+1452,"West Virginia",6285
+1453,"WI Green Bay",6120
+1454,"WI Milwaukee",6135
+1455,"Wichita St",6285
+1456,"William & Mary",6270
+1457,"Winthrop",6075
+1458,"Wisconsin",6240
+1459,"Wofford",6105
+1460,"Wright St",6105
+1461,"Wyoming",6135
+1462,"Xavier",6240
+1463,"Yale",6210
+1464,"Youngstown St",6120

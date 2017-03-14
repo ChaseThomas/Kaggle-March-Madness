@@ -2,33 +2,39 @@ library(aod)
 library(ggplot2)
 library(Rcpp)
 
-setwd("Desktop/Programming/Kaggle/March Madness/")
-mydata <- read.csv("TourneyDetailedResults.csv")
+setwd("/Users/jaredlim/Desktop/Programming/Kaggle/Kaggle-March-Madness/Jared/")
+tourney <- read.csv("TourneyDetailedResults.csv")
+regular <- read.csv("RegularSeasonDetailedResults.csv")
+future_prediction <- read.csv("future_predictions.csv")
+historical_prediction <- read.csv("historical_predictions.csv")
 
-summary(mydata)
+data <- tourney[which(tourney$Season > 2013),]
+data <- rbind(tourney, regular[which(regular$Season > 2013),])
 
-mydata <- mydata[-c(7)]
-sapply(mydata, mean)
+summary(data)
+
+data <- data[-c(7)]
+sapply(data, mean)
 
 team <- read.csv("Teams.csv")
 
-mydata$WfgPer <- mydata$Wfgm / mydata$Wfga
-mydata$Wfg3Per <- mydata$Wfgm3 / mydata$Wfga3
-mydata$WftPer <- mydata$Wftm / mydata$Wfta
-mydata$Woff <- mydata$Wfga + mydata$Wfga3 + mydata$Wfta +
-                  mydata$Wor + mydata$Wast + mydata$Wto + mydata$Wstl
-mydata$Wdef <- mydata$Wdr + mydata$Wblk + mydata$Wto + mydata$Wstl
+data$WfgPer <- data$Wfgm / data$Wfga
+data$Wfg3Per <- data$Wfgm3 / data$Wfga3
+data$WftPer <- data$Wftm / data$Wfta
+data$Woff <- data$Wfga + data$Wfga3 + data$Wfta +
+                  data$Wor + data$Wast + data$Wto + data$Wstl
+data$Wdef <- data$Wdr + data$Wblk + data$Wto + data$Wstl
 
 WfgPer <- aggregate(formula = WfgPer~Wteam,  #aggregate mean
-                  data = mydata, FUN=mean)
+                  data = data, FUN=mean)
 Wfg3Per <- aggregate(formula = Wfg3Per~Wteam,  
-                    data = mydata, FUN=mean)
+                    data = data, FUN=mean)
 WftPer <- aggregate(formula = WftPer~Wteam, 
-                    data = mydata, FUN=mean)
+                    data = data, FUN=mean)
 Woff <- aggregate(formula = Woff~Wteam, 
-                    data = mydata, FUN=mean)
+                    data = data, FUN=mean)
 Wdef <- aggregate(formula = Wdef~Wteam, 
-                    data = mydata, FUN=mean)
+                    data = data, FUN=mean)
 
 
 colnames(WfgPer)[1] = "Team_Id"
@@ -55,9 +61,9 @@ get_elo_of <- function(id) {
 # Elo rating
 team$Elo <- 1500
 
-for (i in c(1:nrow(mydata))) {
-  w_id <- mydata[i,]$Wteam
-  l_id <- mydata[i,]$Lteam
+for (i in c(1:nrow(data))) {
+  w_id <- data[i,]$Wteam
+  l_id <- data[i,]$Lteam
   
   w_rating <- get_elo_of(w_id)
   l_rating <- get_elo_of(l_id)
@@ -72,3 +78,4 @@ for (i in c(1:nrow(mydata))) {
   team[which(team$Team_Id == w_id),]$Elo = w_rating
   team[which(team$Team_Id == l_id),]$Elo = l_rating
 }
+  
