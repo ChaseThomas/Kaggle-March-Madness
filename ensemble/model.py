@@ -30,8 +30,9 @@ def get_positives(results, threshold):
     Uses the results from the 'run_ensemble' function above
     """
     positives = []
+    # Each result corresponds to the probability of [-1, 1] in that order.
     for result in results:
-        if result[0] > threshold:
+        if result[1] > threshold:
             positives.append(1)
         else:
             positives.append(0)
