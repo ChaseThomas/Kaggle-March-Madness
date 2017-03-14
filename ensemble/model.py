@@ -22,4 +22,11 @@ def run_ensemble(train, test):
         test = test[pandas.notnull(test[col])]
 
     logR = logR.fit(train[columns], train['actual'])
-    print logR.predict_proba(test[columns])
+    results = logR.predict_proba(test[columns])
+    positives = []
+    for result in results:
+        if result[0] > 0.5:
+            positives.append(1)
+        else:
+            positives.append(0)
+    return positives
