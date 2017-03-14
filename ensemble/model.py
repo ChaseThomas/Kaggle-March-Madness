@@ -7,5 +7,19 @@ def run_ensemble(train, test):
     and "combined_test" csv files in the "train" and "test" directories.
     """
     logR = LogisticRegression()
-    logR = logR.fit(training.drop(['actual'], axis=1), training['actual'])
-    logR.predict_proba(testing)
+
+    # Compose set of columns to use for training and testing
+
+    columns = ['team1','team2']
+    for col in train:
+        if 'pred_' in col:
+            columns.append(col)
+
+    # Filter out NaN rows in training and testing set
+
+    for col in columns:
+        train = train[pandas.notnull(train[col])]
+        test = test[pandas.notnull(test[col])]
+
+    logR = logR.fit(train[columns], train['actual'])
+    print logR.predict_proba(test[columns])
