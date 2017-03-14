@@ -31,6 +31,7 @@ def get_positives(results, threshold):
     """
     positives = []
     # Each result corresponds to the probability of [-1, 1] in that order.
+    # So need to check result[1] for each result in results
     for result in results:
         if result[1] > threshold:
             positives.append(1)

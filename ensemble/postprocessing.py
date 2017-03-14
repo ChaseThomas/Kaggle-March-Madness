@@ -13,7 +13,7 @@ def prepare_kaggle_csv(test, results):
 
     for i in xrange(len(test)-1):
         kaggle_id = "2017_{}_{}".format(test["team1"].values[i], test["team2"].values[i])
-        pred = results[i][0]
+        pred = results[i][1]
         csv_rows.append([kaggle_id, pred])
 
     with open('submission.csv', 'w') as kaggle_csv:
