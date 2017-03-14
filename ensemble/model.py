@@ -23,9 +23,15 @@ def run_ensemble(train, test):
 
     logR = logR.fit(train[columns], train['actual'])
     results = logR.predict_proba(test[columns])
+    return results
+
+def get_positives(results, threshold):
+    """
+    Uses the results from the 'run_ensemble' function above
+    """
     positives = []
     for result in results:
-        if result[0] > 0.5:
+        if result[0] > threshold:
             positives.append(1)
         else:
             positives.append(0)

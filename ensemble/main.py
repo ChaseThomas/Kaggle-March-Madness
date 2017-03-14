@@ -1,9 +1,10 @@
-import combine_csvs
 import math
 import model
+import preprocessing
+import postprocessing
 
 def main_cross_validated():
-    combined = combine_csvs.combine_csvs({
+    combined = preprocessing.combine_csvs({
         "train": ["season", "team1", "team2", "actual"]
     })
     data = combined["train"]
@@ -12,7 +13,10 @@ def main_cross_validated():
     train = data[:split_size]
     test = data[split_size:]
 
-    positives = model.run_ensemble(train, test)
+    positives = model.get_positives(
+        model.run_ensemble(train, test),
+        threshold=0.5
+    )
     accurate_count = 0
 
     for i in xrange(0, len(positives)):
@@ -22,14 +26,15 @@ def main_cross_validated():
     print accurate_count / len(test)
 
 def main():
-    combined = combine_csvs.combine_csvs({
+    combined = preprocessing.combine_csvs({
         "train": ["season", "team1", "team2", "actual"],
         "test": ["team1", "team2"],
     })
     train = combined["train"]
     test = combined["test"]
-    model.run_ensemble(train, test)
+    probs = model.run_ensemble(train, test)
+    postprocessing.prepare_kaggle_csv(test, probs)
 
-#main()
+main()
 
-main_cross_validated()
+#main_cross_validated()
